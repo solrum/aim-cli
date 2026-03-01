@@ -22,14 +22,18 @@ AI coding tools share 3 common failure modes:
 
 ```bash
 npm install -g @solrum/aim
+aim install
 ```
 
-Requires Node.js 18+.
+`npm install -g` installs the CLI. `aim install` downloads aim-core to `~/.aim/core/` (git clone). Requires Node.js 18+ and git.
 
 ## Quick Start
 
 ```bash
-# Initialize in your project (auto-detects stack, installs knowledge packs)
+# 1. Install aim-core (one-time setup)
+aim install
+
+# 2. Initialize in your project (auto-detects stack, installs knowledge packs)
 cd your-project
 aim init
 
@@ -133,22 +137,28 @@ Files in `.aim/runtime/` and `.claude/commands/aim-*` are auto-managed. Don't ed
 
 ## CLI Reference
 
-```bash
-aim init                    # Initialize AIM in current project
-aim adapt <tool>            # Generate adapter (claude-code|cursor|windsurf|generic)
-aim adapt <tool> --update   # Update runtime to latest version
-aim adapt <tool> --remove   # Remove AIM hooks (keeps your hooks)
-aim index                   # Build/refresh context index
-aim mistake add             # Record a new mistake
-aim mistake list            # List all recorded mistakes
-aim knowledge add <file>    # Add custom knowledge fragment
-aim knowledge list          # List custom knowledge
-aim pack install <source>   # Install pack (npm, git, or local path)
-aim pack list               # List installed packs
-aim pack create <name>      # Scaffold a new pack
-aim stats                   # Show effectiveness metrics
-aim doctor                  # Diagnose setup issues
 ```
+AIM — AI Implementation Manager
+
+Usage:
+  aim install                     Download aim-core to ~/.aim/core/
+  aim update                      Update aim-core to latest version
+  aim init [tool]                 Scan project, generate aim.json + .aim/ + runtime
+  aim init [tool] --refresh       Re-scan without overwriting aim.json
+  aim index [--refresh]           Build or refresh context index
+  aim mistake <add|list|stats>    Manage mistake database
+  aim knowledge <add|list>        Manage custom knowledge fragments
+  aim adapt <tool>                Generate hooks + skills + runtime
+  aim adapt <tool> --update       Update runtime scripts to latest version
+  aim adapt <tool> --remove       Remove AIM hooks (keeps user hooks)
+  aim stats                       Show effectiveness metrics
+  aim doctor                      Validate setup and diagnose issues
+  aim pack <command>              Manage community knowledge packs
+
+Tools: claude-code, cursor, windsurf, generic
+```
+
+Run `aim` or `aim help` to see this help text.
 
 ## Troubleshooting
 

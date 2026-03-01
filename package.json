@@ -1,0 +1,23 @@
+{
+  "name": "@solrum/aim",
+  "version": "0.1.1",
+  "description": "AI Implementation Manager — workflow enforcement, mistake tracking, and chunked execution for any AI coding tool",
+  "bin": {
+    "aim": "./bin/aim.js"
+  },
+  "files": ["bin/", "cli/", "README.md"],
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/solrum/aim.git"
+  },
+  "author": {
+    "name": "Solrum",
+    "url": "https://github.com/solrum/aim"
+  },
+  "license": "MIT",
+  "keywords": ["ai", "workflow", "quality-gates", "mistake-tracking", "claude", "cursor", "windsurf", "coding-assistant"],
+  "engines": {
+    "node": ">=18"
+  }
+}
