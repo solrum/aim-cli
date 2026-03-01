@@ -3,7 +3,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 const { CORE_DIR } = require('./core-resolver');
 
-const REPO_URL = 'https://github.com/solrum/aim-core.git';
+const REPO_URL = 'git@github.com:solrum/aim-core.git';
 
 function run() {
   console.log('\nAIM — Installing aim-core...\n');
@@ -24,7 +24,10 @@ function run() {
     execSync(`git clone -b main --single-branch ${REPO_URL} "${CORE_DIR}"`, { stdio: 'inherit' });
   } catch (e) {
     console.error('\nError: git clone failed.');
-    console.error('Make sure git is installed and you have network access.');
+    console.error('Make sure:');
+    console.error('  1. git is installed');
+    console.error('  2. SSH key is configured for GitHub (https://docs.github.com/en/authentication/connecting-to-github-with-ssh)');
+    console.error('  3. You have access to the solrum/aim-core repository');
     process.exit(1);
   }
 

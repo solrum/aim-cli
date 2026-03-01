@@ -1,6 +1,6 @@
 {
   "name": "@solrum/aim",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AI Implementation Manager — workflow enforcement, mistake tracking, and chunked execution for any AI coding tool",
   "bin": {
     "aim": "./bin/aim.js"
