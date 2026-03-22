@@ -18,6 +18,7 @@ const commands = {
   stats:     () => require('../cli/stats').run(),
   doctor:    () => require('../cli/doctor').run(),
   pack:      () => require('../cli/pack').run(),
+  skill:     () => require('../cli/skill').run(),
 };
 
 if (!command || command === 'help' || command === '-h' || command === '--help' || !commands[command]) {
@@ -37,8 +38,12 @@ Usage:
   aim stats                       Show effectiveness metrics
   aim doctor                      Validate setup and diagnose issues
   aim pack <command>              Manage community knowledge packs
+  aim skill new <name> [--type]   Scaffold a new skill from type template
+  aim skill evolve <name> <lesson> Append lesson to skill's evolution/gotchas.md
+  aim skill list                  List all skills with 5-layer health status
 
 Tools: claude-code, cursor, windsurf, generic
+Skill types: knowledge, verification, data, automation, scaffolding, review, runbook, infra
 `);
   process.exit(0);
 }

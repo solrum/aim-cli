@@ -213,6 +213,54 @@ function run() {
     issues.push('aim-core: not found. Run `aim install` to download.');
   }
 
+  // 11. Skill structure health (Chunk 9 — 5-layer validation)
+  const userSkillsDir = path.join(projectRoot, '.aim', 'skills');
+  if (fs.existsSync(userSkillsDir)) {
+    const skillIndexPath = path.join(userSkillsDir, 'SKILLS.md');
+    const indexedSkillNames = new Set();
+
+    if (fs.existsSync(skillIndexPath)) {
+      const idxContent = fs.readFileSync(skillIndexPath, 'utf8');
+      for (const line of idxContent.split('\n')) {
+        if (!line.startsWith('|')) continue;
+        if (/[-–]{3,}/.test(line) || /skill\s*\|/i.test(line)) continue;
+        const cols = line.split('|').map(c => c.trim()).filter(Boolean);
+        if (cols.length >= 1) indexedSkillNames.add(cols[0]);
+      }
+    }
+
+    const skillDirs = fs.readdirSync(userSkillsDir, { withFileTypes: true })
+      .filter(e => e.isDirectory() && !e.name.startsWith('_') && !e.name.startsWith('.'));
+
+    let skillIssueCount = 0;
+    for (const entry of skillDirs) {
+      const dir = path.join(userSkillsDir, entry.name);
+      const hasSKILL = fs.existsSync(path.join(dir, 'SKILL.md'));
+      const hasVerify = fs.existsSync(path.join(dir, 'verification', 'checklist.md'));
+      const hasEvolve = fs.existsSync(path.join(dir, 'evolution', 'gotchas.md'));
+      const inIndex = indexedSkillNames.has(entry.name);
+
+      if (!hasSKILL || !hasVerify) {
+        issues.push(`skill "${entry.name}": ${!hasSKILL ? 'missing SKILL.md' : 'missing verification/checklist.md'}`);
+        skillIssueCount++;
+      } else if (!inIndex) {
+        issues.push(`skill "${entry.name}": not in SKILLS.md index (won't be auto-routed)`);
+        skillIssueCount++;
+      } else if (!hasEvolve) {
+        // evolution/ is advisory, not required
+        ok.push(`skill "${entry.name}": ✅ (no evolution/gotchas.md yet)`);
+      } else {
+        ok.push(`skill "${entry.name}": ✅`);
+      }
+    }
+
+    if (skillDirs.length === 0) {
+      ok.push('skills: no user skills yet (run `aim skill new <name>` to create)');
+    } else if (skillIssueCount === 0) {
+      ok.push(`skills: ${skillDirs.length} skill(s) — all structures valid`);
+    }
+  }
+
   // Output
   console.log('✓ Passing:');
   ok.forEach(msg => console.log(`  ✓ ${msg}`));

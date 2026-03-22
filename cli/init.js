@@ -107,7 +107,11 @@ function detectStack(projectRoot) {
 }
 
 function generateConfig(projectRoot, stack, tool) {
-  return {
+  const phases = generatePhasePatterns(stack);
+  const phaseSkills = generatePhaseSkills(stack);
+  const modelRouting = generateModelRouting(stack);
+
+  const config = {
     "$schema": "https://raw.githubusercontent.com/solrum/aim/main/schema/aim-config.schema.json",
     stack: stack.language,
     database: stack.database || null,
@@ -128,6 +132,113 @@ function generateConfig(projectRoot, stack, tool) {
     rules: { useUniversal: true, useStackRules: true },
     mistakes: { projectFile: ".aim/mistakes.json", useGlobal: true, autoRecord: true },
     knowledge: { useStackPractices: true, useTechNotes: true, maxItemsPerChunk: 3 }
+  };
+
+  // phases: file path substrings → phase names (stack-specific, empty if unknown)
+  if (Object.keys(phases).length > 0) {
+    config.phases = phases;
+  }
+
+  // skills.phaseSkills: phase → skill folder (populated from packs after install)
+  if (Object.keys(phaseSkills).length > 0) {
+    config.skills = {
+      enabled: true,
+      autoRoute: true,
+      phaseSkills
+    };
+  }
+
+  // modelRouting: keyword lists — user fills in their project's natural language
+  config.modelRouting = modelRouting;
+
+  return config;
+}
+
+/**
+ * Generate phase path patterns for the detected stack.
+ * These are generic structural patterns — projects should refine them in aim.json.
+ * Returns {} for unknown stacks (user configures manually).
+ */
+function generatePhasePatterns(stack) {
+  // Generic patterns common across most architectures
+  const common = {
+    'migration': ['db/migrations/', 'migrations/', 'database/migrations/'],
+    'sql-query': ['db/queries/', 'queries/'],
+    'domain-model': ['domain/models/', 'models/', 'entities/'],
+    'repository-interface': ['domain/repositories/', 'repositories/interfaces/'],
+    'repository-impl': ['infrastructure/persistence/repositories/', 'infrastructure/repositories/'],
+    'service-interface': ['domain/services/'],
+    'service-impl': ['infrastructure/services/', 'services/'],
+    'command': ['application/commands/', 'commands/'],
+    'query': ['application/queries/', 'queries/'],
+    'dto': ['application/shared/', 'dtos/', 'dto/'],
+  };
+
+  const byStack = {
+    go: {
+      ...common,
+      'grpc-handler':  ['presentation/grpc/handlers/', 'handlers/'],
+      'grpc-mapper':   ['presentation/grpc/mappers/', 'mappers/'],
+      'proto':         ['.proto'],
+      'wire':          ['wire/wire.go'],
+      'error-codes':   ['pkg/errors/reasons.go'],
+      'i18n':          ['i18n/locales/'],
+    },
+    typescript: {
+      ...common,
+      'controller':    ['controllers/', 'handler/', '.controller.ts'],
+      'middleware':    ['middleware/', '.middleware.ts'],
+      'module':        ['.module.ts'],
+      'schema':        ['schemas/', '.schema.ts'],
+      'test':          ['.spec.ts', '.test.ts', '__tests__/'],
+    },
+    python: {
+      ...common,
+      'view':          ['views/', 'endpoints/'],
+      'serializer':    ['serializers/'],
+      'schema':        ['schemas/'],
+      'test':          ['tests/', 'test_'],
+    },
+    rust: {
+      ...common,
+      'handler':       ['handlers/', 'routes/'],
+      'model':         ['models/'],
+      'test':          ['#[cfg(test)]'],
+    },
+  };
+
+  return byStack[stack.language] || {};
+}
+
+/**
+ * Generate phase → skill suggestions based on stack + packs.
+ * Returns empty object — actual skills are defined by installed packs.
+ * This is intentionally left empty so packs populate it at install time.
+ */
+function generatePhaseSkills(stack) {
+  // Skills come from packs, not from the generator.
+  // Packs register their phaseSkills into aim.json post-install.
+  return {};
+}
+
+/**
+ * Generate modelRouting config with base English keywords.
+ * Projects should extend planningKeywords / implementKeywords
+ * with their own natural language (e.g. Vietnamese, French, domain terms).
+ */
+function generateModelRouting(stack) {
+  return {
+    enabled: true,
+    planningModel: 'claude-opus-4-6',
+    implementModel: 'claude-sonnet-4-6',
+    planningKeywords: [
+      'plan', 'design', 'analyze', 'architect', 'roadmap',
+      'strategy', 'brainstorm', 'propose', 'how should', 'review'
+    ],
+    implementKeywords: [
+      'implement', 'add', 'fix', 'update', 'build',
+      'create', 'write', 'debug', 'explore', 'search'
+    ]
   };
 }
 
